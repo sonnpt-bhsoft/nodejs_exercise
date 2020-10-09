@@ -1,0 +1,9 @@
+// xử lí dữ liệu của mongoose
+module.exports = {
+    multiMongooseToObject : function(mongoose) {
+        return mongoose.map(mongoose => mongoose.toObject())
+    },
+    mongooseToObject : function(mongoose) {
+        return mongoose ? mongoose.toObject() : mongoose;
+    }
+};
