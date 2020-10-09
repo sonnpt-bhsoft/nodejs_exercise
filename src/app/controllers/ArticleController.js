@@ -36,22 +36,25 @@ class ArticleController{
         }
     }
 
-    delete(req, res, next) {
-        if(req.user) {
-        Articles.deleteOne({ slug: req.params.slug })
-            .then(() => {
-                res.send('success')
-            })
-            .catch(next);
+    async delete(req, res, next) {
+        try {
+            await Articles.deleteOne({ slug: req.params.slug })
+            return res.status(200).json('Successfully')
+        } catch (error) {
+            res.status(401).send('Error')
         }
     } 
     
-    favorite(req, res, next) {
-        Articles.updateOne({ slug: req.params.slug }, { $set: { 'favorite': true } }, { multi: true })
-            .then(() => {
-                res.send({message: 'success'})
-            })
-            .catch(next);
+    async favorite(req, res, next) {
+        try {
+            const article = await Articles.updateOne({ slug: req.params.slug }, { $set: { 'favorite': true } }, { multi: true })
+            return res.json({article})
+        } catch (error) {
+            res.status(401).send('Error')   
+        }
+
+        
+
     }  
     
     unfavorite(req, res, next){
