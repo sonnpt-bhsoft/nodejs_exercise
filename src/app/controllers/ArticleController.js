@@ -57,42 +57,41 @@ class ArticleController{
 
     }  
     
-    unfavorite(req, res, next){
-        Articles.updateOne({ slug: req.params.slug }, { $unset: { 'favorite': true } }, { multi: true })
-            .then(() => {
-                res.send({message: 'success'})
-            })
-            .catch(next);
+    async unfavorite(req, res, next){
+        try {
+            Articles.updateOne({ slug: req.params.slug }, { $unset: { 'favorite': true } }, { multi: true }, { new: true })
+            res.status(200).send('Success')
+        } catch (error) {
+            res.status(401).send('Error')
+        }
     }
 
-    showArtByAuthor(req, res, next){
-        const author = req.query.author
-        Articles.find( {$and: [{ "author.fullName": author }]}, function (err,result) {
-            //nếu có lỗi
-            if (err) throw err;
-            //nếu thành công
-            return res.status(200).json({result})
-        });
+    async showArtByAuthor(req, res){
+        try {
+            const author = req.query.author
+            const articles = await Articles.find( {$and: [{ "author.fullName": author }]})
+            res.status(200).json({ articles })
+        } catch (error) {
+            res.status(401).send('Error')
+        }
     }
 
-    getAllArticles(req, res, next){
-        Articles.find({}, function (err,articles) {
-                //nếu có lỗi
-                if (err) throw err;
-                //nếu thành công
-                res.json({articles, articlesCount: articles.length})
-        });
+    async getAllArticles(req, res, next){
+        try {
+            const articles = await Articles.find()
+            res.status(200).json({ articles, articlesCount: articles.length })
+        } catch (error) {
+            res.status(401).send('Error')
+        }
     }
 
-    addComment(req, res, next) {
-        Articles.findOneAndUpdate({ slug: req.params.slug }, { $push: {"comments": req.body}}, {  safe: true, upsert: true},
-            function(err, model) {
-                if(err){
-                   console.log(err);
-                   return res.send(err);
-                }
-                return res.json(model);
-            });
+    async addComment(req, res, next) {
+        try {
+            const comments = await Articles.findOneAndUpdate({ slug: req.params.slug }, { $push: {"comments": req.body}}, { safe: true, upsert: true })
+            res.status(200).json({ comments })
+        } catch (error) {
+            res.status(401).send('Error')
+        }        
     }
 
     getAllCmt(req, res, next){
@@ -125,7 +124,7 @@ class ArticleController{
         }
     }
 
-    getAllTags(req, res, next){
+    async getAllTags(req, res, next){
         Articles.find({ }, function (err,tag) {
             //nếu có lỗi
             if (err) throw err;
