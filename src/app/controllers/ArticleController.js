@@ -36,7 +36,7 @@ class ArticleController{
         }
     }
 
-    async delete(req, res, next) {
+    async delete(req, res) {
         try {
             await Articles.deleteOne({ slug: req.params.slug })
             return res.status(200).json('Successfully')
@@ -45,19 +45,16 @@ class ArticleController{
         }
     } 
     
-    async favorite(req, res, next) {
+    async favorite(req, res) {
         try {
             const article = await Articles.updateOne({ slug: req.params.slug }, { $set: { 'favorite': true } }, { multi: true })
             return res.json({article})
         } catch (error) {
             res.status(401).send('Error')   
         }
-
-        
-
     }  
     
-    async unfavorite(req, res, next){
+    async unfavorite(req, res){
         try {
             Articles.updateOne({ slug: req.params.slug }, { $unset: { 'favorite': true } }, { multi: true }, { new: true })
             res.status(200).send('Success')
@@ -76,7 +73,7 @@ class ArticleController{
         }
     }
 
-    async getAllArticles(req, res, next){
+    async getAllArticles(req, res){
         try {
             const articles = await Articles.find()
             res.status(200).json({ articles, articlesCount: articles.length })
@@ -85,55 +82,41 @@ class ArticleController{
         }
     }
 
-    async addComment(req, res, next) {
+    async addComment(req, res) {
         try {
-            const comments = await Articles.findOneAndUpdate({ slug: req.params.slug }, { $push: {"comments": req.body}}, { safe: true, upsert: true })
-            res.status(200).json({ comments })
+            const comment = await Articles.findOneAndUpdate({ slug: req.params.slug }, { $push: {"comments": req.body}}, { safe: true, upsert: true })
+            res.status(200).json({ comment })
         } catch (error) {
             res.status(401).send('Error')
         }        
     }
 
-    getAllCmt(req, res, next){
-        Articles.find({ slug: req.params.slug }, function (err,comment) {
-            //nếu có lỗi
-            if (err) throw err;
-            //nếu thành công
-            return res.status(200).send({comment})
-        }).select('comments');
+    async getAllCmt(req, res){
+        try {
+            const comments = await Articles.find({ slug: req.params.slug }).select('comments')
+            res.status(200).json({ comments, commentsCount: comments.length }) 
+        } catch (error) {
+            res.status(401).send('Error')
+        }
     }
     
-
-    // deleteCmt(req, res, next){
-    //     Articles.findOneAndUpdate( { slug: req.params.slug }, { $pull: { 'comments': {  _id: req.params.id } } },
-    //         function(err,model){
-    //             if(err){
-    //                 console.log(err);
-    //                 return res.send(err);
-    //             }
-    //             return res.json(model);
-    //         });
-    // }
-
     async deleteCmt(req, res){
         try {
             await Articles.findOneAndUpdate({ slug: req.params.slug }, { $pull: { 'comments': { _id: req.params.id } } })
-            return res.send('success')
+            return res.send('Success')
         } catch (error) {
             res.status(401).message('Error')
         }
     }
 
-    async getAllTags(req, res, next){
-        Articles.find({ }, function (err,tag) {
-            //nếu có lỗi
-            if (err) throw err;
-            //nếu thành công
-            return res.status(200).send({tag})
-        }).select('tagList');
+    async getAllTags(req, res){
+        try {
+            const result = await Articles.find().select('tagList')
+            res.status(200).json({ result })
+        } catch (error) {
+            res.status(401).send('Error')
+        }        
     }
-
-
 }
 
 module.exports = new ArticleController;
