@@ -6,29 +6,31 @@ const Schema = mongoose.Schema;
 
 class UserController{
 
-    show(req, res, next) {
-        User.findOne({ fullName: req.params.slug }, { _id: 0, hash_password: 0 }, function (err,profile) {
-            //nếu có lỗi
-            if (err) throw err;
-            //nếu thành công
-            return res.status(200).json({profile})
-        });
-    }
-
-    follow(req, res, next) {
-        const profile = req.user;
-        User.updateOne({ fullName: req.params.slug }, { $set: { 'following': true } }, { multi: true })
-            .then (() => {
-                return res.status(200).json({ profile, message:"Value Updated" })
-            })
+    async show(req, res, next) {
+        try {
+            const users = await User.findOne({ fullName: req.params.slug }, { _id: 0, hash_password: 0 })
+            return res.status(200).json({ users })
+        } catch (error) {
+            return res.status(401).send('Error')
+        }
     }  
+
+    async follow(req, res){
+        try {
+            const result = await User.findOneAndUpdate({ fullName: req.params.slug }, { $set: { 'following': true } }, { new: true })
+            return res.status(200).json({ result })
+        } catch (error) {
+            return res.status(401).send('Error')
+        }
+    }
     
-    unfollow(req, res, next){
-        User.updateOne({ fullName: req.params.slug }, { $unset: { 'following': true } }, { multi: true })
-            .then(() => {
-                res.send({message: 'success'})
-            })
-            .catch(next);
+    async unfollow(req, res){
+        try {
+            const result = await User.findOneAndUpdate({ fullName: req.params.slug }, { $unset: { 'following': true } }, { new: true })
+            return res.status(200).json({ result })
+        } catch (error) {
+            return res.status(401).send('Error')
+        }
     }
 
     

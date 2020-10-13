@@ -24,7 +24,7 @@ const Article = new Schema([{
     comments: [{ 
         post: String,
         posted: {type: Date, default: Date.now}
-      }]
+    }]
 }], {
     strict: false, 
     timestamps: true

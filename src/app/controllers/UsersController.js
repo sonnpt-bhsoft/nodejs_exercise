@@ -26,34 +26,20 @@ class UsersController{
     });
   }
 
-  // register(req, res){
-  //   var newUser = new User(req.body);
-  //   newUser.hash_password = bcrypt.hashSync(req.body.password, 10);
-  //   newUser.save(function(err, user) {
-  //     if (err) {
-  //       return res.status(400).send({
-  //         message: err
-  //       });
-  //     } else {
-  //       user.hash_password = undefined;
-  //       return res.json({user});
-  //     }
-  //   });
-  // }
   async register(req, res){
     try {
       var newUser = new User(req.body)
       newUser.hash_password = bcrypt.hashSync(req.body.password, 10)
       const user = await newUser.save()
       user.hash_password = undefined;
-      res.json({user});
+      return res.status(200).json({ user })
     } 
     catch (error) {
-      res.status(401).send('Error')
+      return res.status(401).send('Error')
     }
   }
 
-  async index(req, res) {
+  index(req, res) {
     if(req.user) {     
         const user = req.user;   
         return res.json({user})
@@ -64,9 +50,9 @@ class UsersController{
   async update(req, res, next) {
     try {
       const user = await User.findOneAndUpdate( { _id: req.user.userId }, req.body, {new: true} )
-      return res.json(user)
+      return res.status(200).json({ user })
     } catch (error) {
-      res.status(401).send('Error')
+      return res.status(401).send('Error')
     }
   }
 }

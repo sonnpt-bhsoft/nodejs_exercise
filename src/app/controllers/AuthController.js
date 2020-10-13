@@ -6,7 +6,6 @@ class AuthController{
     isAuthenticated(req, res, next){
         try {
             const token = req.headers.authorization;
-    
             // Xác thực token
             jwt.verify(token, 'RESTFULAPIs', (err, payload) => {
                 if(payload) {
